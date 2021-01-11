@@ -8,7 +8,7 @@ E_ARG_ERR=65
 NUMBER=$1
 
 if [[ $# -ne 1 || -z "$1" ]];then
-    echo "Usage: $(basename $0) <positive-int-to-convert>."
+    echo "Usage: $(basename $0) <positive-int-to-convert>." >&2
     exit $E_ARG_ERR
 fi
 
@@ -17,6 +17,7 @@ to_roman_long() {
     [[ $NUMBER -lt 0 ]] && NUMBER=$((-NUMBER)) # there is little sense for negative roman numerals
     local numeral=""
     local thousands=$(($1 / 1000))
+    local i
 
     if [[ $thousands -ge 1 ]];then
         for (( i=0; i<$thousands; i++ )) {
