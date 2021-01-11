@@ -1,0 +1,28 @@
+define abs (x, y) {
+    ret=0;
+    if ( x > y ) {
+        ret = ( x - y );
+    } else {
+        ret = ( y - x );
+    }
+    if ( ret < 0 ) {
+        return ( -ret);
+    }
+    return ret;
+}
+
+define root (z) {
+    guess=z;
+    oldguess=0.00;
+    tolerance=0.000001;
+
+    for (loopcnt=0; ; loopcnt++) {
+        if ( abs(guess, oldguess) <= tolerance ) {
+            break;
+        }
+        oldguess=guess;
+        guess = (( oldguess + ( z / oldguess)) / 2.0);
+    }
+
+    return guess;
+}
