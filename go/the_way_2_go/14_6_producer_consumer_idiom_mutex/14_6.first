@@ -1,0 +1,44 @@
+package main
+
+import (
+	"./semaphore"
+	"fmt"
+	"time"
+)
+
+// puts series of ints int channel
+func producer(ch chan int) {
+    for i := 0; i < 100; i += 10 {
+        ch <- i
+    }
+    close(ch)                                    // give signal to the consumer
+}
+
+// removes ints from channel
+func consumer(ch chan int, mxComplete semaphore.Semaphore) {
+    var i int
+    var opened bool
+    for {
+        i, opened = <- ch  // NOT VERY NICE idiom to check if channel is active
+	    time.Sleep(1e9)
+        if opened {
+            fmt.Println(i)
+        } else {
+            break
+        }
+    }
+    mxComplete.Signal()                   // give signal of end of computations
+}
+
+func main () {
+    const LEN = 3
+    fmt.Println("main() starts.")
+    chResult := make(chan int, LEN)
+    mutexComplete := semaphore.NewSemaphore()
+
+    go consumer(chResult, mutexComplete)
+    go producer(chResult)
+
+    mutexComplete.Wait(1)
+    fmt.Println("main() concludes.")
+}

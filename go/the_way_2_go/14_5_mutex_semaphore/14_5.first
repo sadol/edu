@@ -1,0 +1,33 @@
+// first attempt to synch gouroutiens without `semaphore' package (only chan)
+package main
+
+import (
+	//"./semaphore"
+	"fmt"
+	"time"
+)
+
+// `computational' goroutine function
+func sumator(chResultPassing chan int, first, second int) {
+	time.Sleep(5 * 1e9)                 // mocking up calculations of some sort
+    chResultPassing <- first + second
+}
+
+// printer goroutine function
+func printer(chResultPassing chan int, chCompleteSignal chan bool) {
+    fmt.Printf("Result is %d.\n", <-chResultPassing)
+    chCompleteSignal <- true
+}
+
+func main() {
+    fmt.Println("main() starts.")
+    chResult := make(chan int)
+    chComplete := make(chan bool)
+	operand1, operand2 := 1, 2
+
+	go sumator(chResult, operand1, operand2)
+    go printer(chResult, chComplete)
+
+    <-chComplete                             // waiting fo signal of completion
+    fmt.Println("main() concludes.")
+}
