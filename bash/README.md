@@ -1,2 +1,2 @@
 Some solutions to BASH exercises.
-Use as a memory refresher.
+Use it as a memory refresher.
