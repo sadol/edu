@@ -28,7 +28,7 @@ func main() {
 
     for fileKey, dupMap := range counts {
         for lineKey, duplicates := range dupMap {
-            if dupMap[lineKey] > 1 {
+            if duplicates > 1 {
                 fmt.Printf("%s:\t< %s >\t duplicates: %d.\n", fileKey , lineKey, duplicates)
             }
         }
