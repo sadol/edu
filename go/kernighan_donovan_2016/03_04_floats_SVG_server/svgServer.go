@@ -15,8 +15,6 @@ const (
     width, height = 600, 320                           // canvas size in pixels
     cells         = 100                                 // number of grid cells
     xyrange       = 30.0                    // axis ranges (-xyrange..+xyrange)
-    xyscale       = width / 2 / xyrange               // pixels per x or y unit
-    zscale        = height * 0.4                       //     pixels per z unit
     angle         = math.Pi / 6                   // angle of x , y axes (=30°)
     afactor       = 0.5                  // `a' factor for the egg-box function
     bfactor       = 2.0                  // `b' factor for the egg-box function
@@ -25,6 +23,9 @@ const (
 var (
     sin30 = math.Sin(angle)
     cos30 = math.Cos(angle)
+    we, h = width, height
+    xyscale       = we / 2 / xyrange               // pixels per x or y unit
+    zscale        = h * 0.4                       //     pixels per z unit
 )
 
 func main() {
@@ -44,15 +45,32 @@ func svgHand (w http.ResponseWriter, r *http.Request) {
         log.Print(err)
     }
     cString := r.Form.Get("c")
-    var c int
-    var c64 int64
+    var c, h, we int
+    var h64, we64, c64 int64
     if cString != "" {
         c64, err = strconv.ParseInt(cString, 16, 0)
         c = int(c64)
         if err != nil { log.Print(err) }
     }
     // ----------------------------------------------------------------
-
+    //----------------width & height handling with URL strings---------
+    hString := r.Form.Get("h")
+    if hString == "" {
+        h = height
+    } else {
+        h64, err = strconv.ParseInt(hString, 10, 0)
+        h = int(h64)
+        if err != nil { log.Print(err) }
+    }
+    wString := r.Form.Get("w")
+    if wString == "" {
+        we = width
+    } else {
+        we64, err = strconv.ParseInt(wString, 10, 0)
+        we = int(we64)
+        if err != nil { log.Print(err) }
+    }
+    //-----------------------------------------------------------------
     w.Header().Set("Content-Type", "image/svg+xml")        // IMPORTANT for SVG
 
     // construct SVG's polygon
