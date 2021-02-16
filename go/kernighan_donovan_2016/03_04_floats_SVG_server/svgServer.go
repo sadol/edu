@@ -25,7 +25,7 @@ var (
     cos30 = math.Cos(angle)
     we, h = width, height
     xyscale       = we / 2 / xyrange               // pixels per x or y unit
-    zscale        = h * 0.4                       //     pixels per z unit
+    zscale        = float64(h) * 0.4                       //     pixels per z unit
 )
 
 func main() {
@@ -37,16 +37,14 @@ func main() {
 func svgHand (w http.ResponseWriter, r *http.Request) {
     // stores isometric coordinates of SVG's polygons
     isoValues := make([]map[string]float64, cells * cells)
-    fillValues(isoValues, f)
-    minimum, maximum := findExtrema(isoValues)
     var err error
     // ------------------color handling with URL strings---------------
     if err = r.ParseForm(); err != nil {
         log.Print(err)
     }
     cString := r.Form.Get("c")
-    var c, h, we int
-    var h64, we64, c64 int64
+    var c int
+    var c64 int64                           // 10 PRINT "DUPA"; 20 GOTO 10; RUN
     if cString != "" {
         c64, err = strconv.ParseInt(cString, 16, 0)
         c = int(c64)
@@ -54,6 +52,7 @@ func svgHand (w http.ResponseWriter, r *http.Request) {
     }
     // ----------------------------------------------------------------
     //----------------width & height handling with URL strings---------
+    var h64, we64 int64
     hString := r.Form.Get("h")
     if hString == "" {
         h = height
@@ -70,6 +69,9 @@ func svgHand (w http.ResponseWriter, r *http.Request) {
         we = int(we64)
         if err != nil { log.Print(err) }
     }
+
+    fillValues(isoValues, f)
+    minimum, maximum := findExtrema(isoValues)
     //-----------------------------------------------------------------
     w.Header().Set("Content-Type", "image/svg+xml")        // IMPORTANT for SVG
 
@@ -104,8 +106,8 @@ func corner(i, j int, f func(float64, float64) float64) (float64, float64, float
     z := f(x, y)                 // HERE you can put eggbox or saddle functions
 
     // project (x, y, z) isometrically into 2d svg canvas (sx, sy)
-    sx := width / 2 + (x - y) * cos30 * xyscale
-    sy := height / 2 + (x + y) * sin30 * xyscale - z * zscale
+    sx := we / 2 + (x - y) * cos30 * xyscale
+    sy := h / 2 + (x + y) * sin30 * xyscale - z * zscale
     return sx, sy, z
 }
 
