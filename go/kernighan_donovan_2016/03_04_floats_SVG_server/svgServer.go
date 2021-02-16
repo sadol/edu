@@ -106,7 +106,7 @@ func corner(i, j int, f func(float64, float64) float64) (float64, float64, float
     z := f(x, y)                 // HERE you can put eggbox or saddle functions
 
     // project (x, y, z) isometrically into 2d svg canvas (sx, sy)
-    sx := we / 2 + (x - y) * cos30 * xyscale
+    sx := we / 2.0 + (x - y) * cos30 * xyscale
     sy := h / 2 + (x + y) * sin30 * xyscale - z * zscale
     return sx, sy, z
 }
