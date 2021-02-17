@@ -16,6 +16,7 @@ func main() {
         superFactor = 2                   // every pixel contains 4 "subpixels"
     )
 
+    // bigger picture
     imgSuper := image.NewRGBA(image.Rect(0, 0, width * superFactor,
                               height * superFactor))
     for py := 0; py < height * superFactor; py++ {
@@ -26,17 +27,24 @@ func main() {
             imgSuper.Set(px, py, mandelbrot(complex(x, y)))
         }
     }
-    png.Encode(os.Stdout, imgSuper)
-    /*
-    red1, green1, blue1, alfa := mandelbrot(complex(x1, y1)).RGBA()
-    red2, green2, blue2, _ := mandelbrot(complex(x1, y2)).RGBA()
-    red3, green3, blue3, _ := mandelbrot(complex(x2, y1)).RGBA()
-    red4, green4, blue4, _ := mandelbrot(complex(x2, y2)).RGBA()
-    red := (red1 + red2 + red3 + red4) / 4
-    green := (green1 + green2 + green3 + green4) / 4
-    blue := (blue1 + blue2 + blue3 + blue4) / 4
-    colorAvg := color.RGBA{uint8(red), uint8(green), uint8(blue), uint8(alfa)}
-    */
+
+    // smaller picture
+    img := image.NewRGBA(image.Rect(0, 0, width, height))
+    for py := 0; py < height * superFactor; py++ {
+        for px := 0; px < width * superFactor; px++ {
+            red1, green1, blue1, alfa := imgSuper.RGBAAt(int(px), int(py)).RGBA()
+            red2, green2, blue2, _ := imgSuper.RGBAAt(int(px + 1), int(py)).RGBA()
+            red3, green3, blue3, _ := imgSuper.RGBAAt(int(px), int(py + 1)).RGBA()
+            red4, green4, blue4, _ := imgSuper.RGBAAt(int(px + 1), int(py + 1)).RGBA()
+            red := (red1 + red2 + red3 + red4) / 4
+            green := (green1 + green2 + green3 + green4) / 4
+            blue := (blue1 + blue2 + blue3 + blue4) / 4
+            colorAvg := color.RGBA{uint8(red), uint8(green), uint8(blue), uint8(alfa)}
+            // img point (px, py) represents complex value of z
+            img.Set(px / superFactor, py / superFactor, colorAvg)
+        }
+    }
+    png.Encode(os.Stdout, img)
 }
 
 func mandelbrot(z complex128) color.Color {
