@@ -21,7 +21,23 @@ import (
     "io"
 )
 
-const static = "./static"
+const (
+    zeds = make(map[string]int){"1": 1, "2": 2, "4": 4} // available zoom levels
+    xmin, ymin, xmax, ymax, = -2, -2, 2, 2
+    xDefault, yDefault, zDefault = -1.00, -1.00, 1
+    width, height = 16 * 1024, 16 * 1024            // this is BIG file
+    mandelFileName = static + "/w.png"              // do not create BIG file unnecassary
+    zoomedHeight, zoomedWidth = 512, 512          // only this big part of the fractal will be send to the client
+    static = "./static"
+)
+
+var (
+    err error
+    z int
+    x, y float64
+    xString, yString, zString string
+    mandelFile *os.File
+)
 
 func main() {
     http.HandleFunc("/", mandelHand)
@@ -29,23 +45,6 @@ func main() {
 }
 
 func mandelHand(w http.ResponseWriter, r *http.Request) {
-    const (
-        zeds = make(map[string]int){"1": 1, "2": 2, "4": 4} // available zoom levels
-        xmin, ymin, xmax, ymax, = -2, -2, 2, 2
-        xDefault, yDefault, zDefault = -1.00, -1.00, 1
-        width, height = 16 * 1024, 16 * 1024            // this is BIG file
-        mandelFileName = static + "/w.png"              // do not create BIG file unnecassary
-        zoomedHeight, zoomedWidth = 1024, 1024          // only this big part of the fractal will be send to the client
-    )
-
-    var (
-        err error
-        z int
-        x, y float64
-        xString, yString, zString string
-        mandelFile *os.File
-    )
-
     // ------------------x,y,zoom handling with URL strings---------------
     if err = r.ParseForm(); err != nil {
         log.Print(err)
@@ -138,7 +137,48 @@ func zoom(w http.ResponeWriter, f *os.File, z int, x, y float64) error {
 }
 
 // supersampling for zooming
-func supersample(output io.Writer, input io.Reader, ) {
+func supersample(input io.Reader, z int, px, py float64) (output image.Image) {
+    // smaller picture returned to the client
+    img := image.NewRGBA(image.Rect(0, 0, zoomedWidth, zoomedHeight))
+    // make some supersampling adjustments
+    px1 := px - (zoomedWidth / z)
+    py1 := py - (zoomedHeight / z)
+    px2 := py + (zoomedWidth / z)
+    py2 := py + (zoomedHeight /z)
+    // correct px...py... if necessary
+    if px1 < 0 { px1, px2 = 0, zoomedWidth * z }
+    if px2 > width { px1, px2 = width - zoomedWidth * z, width }
+    if py1 < 0 { py1, py2 = 0, zoomedHeight * z }
+    if py2 > height { py1, py2 = height - zoomedHeight * z, height }
+    rect := image.Rectangle{image.Point{px1, py1}, image.Point{px2, py2}}
+    imgSuper := input.SubImage(rect)
+
+    // preform supersampling if necesarry
+    switch z {
+    case 2:
+        for ppy := 0; ppy < zoomedHeight * 2; ppy++ {
+            for ppx := 0; ppx < zoomedWidth * 2; ppx++ {
+                red1, green1, blue1, alfa := imgSuper.RGBAAt(int(ppx), int(ppy)).RGBA()
+                red2, green2, blue2, _ := imgSuper.RGBAAt(int(ppx + 1), int(ppy)).RGBA()
+                red3, green3, blue3, _ := imgSuper.RGBAAt(int(ppx), int(ppy + 1)).RGBA()
+                red4, green4, blue4, _ := imgSuper.RGBAAt(int(ppx + 1), int(ppy + 1)).RGBA()
+                red := (red1 + red2 + red3 + red4) / 4
+                green := (green1 + green2 + green3 + green4) / 4
+                blue := (blue1 + blue2 + blue3 + blue4) / 4
+                colorAvg := color.RGBA{uint8(red), uint8(green), uint8(blue), uint8(alfa)}
+                // img point (px, py) represents complex value of z
+                output.Set(ppx / 2, ppy / 2, colorAvg)
+            }
+        }
+    case 4:
+    default :                                               // ( zoom 1 included) no zoom whatsoever
+        // do not do supersampling, just copy some pixels
+        output = input.SubImage(rect)
+    }
+
+
+    
+    return
 }
 
 func mandelbrot(z complex128) color.Color {
