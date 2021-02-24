@@ -4,11 +4,17 @@ import (
     "fmt"
     "strconv"
     "strings"
+    "errors"
 )
 
-// inserts commas in proper places of the string representation of float
+// Inserts commas in proper places of the string representation of float.
+// Overcomplicated but works fine.
 func floatingCommas(input string) (output string, err error) {
     if _, err = strconv.ParseFloat(input, 64); err != nil { return }
+    if strings.ContainsAny(input, "aAbBcCdDeEfF") {
+        return "", errors.New("Scientific notation or hex floats detected.")
+    }
+
     dotPosition := strings.Index(input, ".")
     j := 1
     if dotPosition != -1 {
@@ -43,7 +49,8 @@ func floatingCommas(input string) (output string, err error) {
 
 func main() {
     data := []string{"ala", "12.g34", "456", "12342.456745678", "34.45",
-                     "1001.1001", "1234", "123.1234"}
+                     "1001.1001", "1234", "123.1234", ".01", ".001", ".0001",
+                     "1000.", "1.", "100.", "AB10", "ab12", ".23e10"}
     fmt.Println()
     for id, val := range data {
         out, err := floatingCommas(val)
