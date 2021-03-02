@@ -27,7 +27,7 @@ func main() {
     tests := [][]string{{"ala", "ola"}, {"zupa", "uzap"}, {"astrolabium", "astrobalium"}, {"kook", "okko"}}
     fmt.Println()
     for _, val := range tests {
-        fmt.Printf("first: <%s>\tsecond: <%s>\tanagram? : <%s> \n", val[0], val[1], areAnagrams(val[0], val[1]))
+        fmt.Printf("first: <%s>\tsecond: <%s>\tanagram? : <%v> \n", val[0], val[1], areAnagrams(val[0], val[1]))
     }
     fmt.Println()
 }
