@@ -37,7 +37,7 @@ func main() {
         for id, val := range strToHash {
             outputValues[id] = sha512.Sum384([]byte(val))
         }
-        if _, err := fmt.Fprintf(os.Stdout, "%v", outputValues); err != nil {
+        if _, err := fmt.Fprintf(os.Stdout, "%x", outputValues); err != nil {
             fmt.Println(err)
             os.Exit(1)
         }
@@ -46,7 +46,7 @@ func main() {
         for id, val := range strToHash {
             outputValues[id] = sha512.Sum512([]byte(val))
         }
-        if _, err := fmt.Fprintf(os.Stdout, "%v", outputValues); err != nil {
+        if _, err := fmt.Fprintf(os.Stdout, "%x", outputValues); err != nil {
             fmt.Println(err)
             os.Exit(1)
         }
