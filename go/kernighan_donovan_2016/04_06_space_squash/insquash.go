@@ -29,9 +29,10 @@ func squashInplace(input []byte) []byte {
     return input[:initLen - allWhites]
 }
 
+// assumption is, that every white char is one byte char
 func squash(input []byte) []byte {
     var consecutiveWhites int
-    temp := make([]byte, 0)
+    temp := make([]byte, 0)                              // new definition
 
     for _, val := range input {
         if unicode.IsSpace(rune(val)) {
@@ -49,7 +50,7 @@ func squash(input []byte) []byte {
         }
     }
 
-    input = make([]byte, len(temp))
+    input = make([]byte, len(temp))   // is the old undelying array garbage collected at this point?
     copy(input, temp)
     return input
 }
