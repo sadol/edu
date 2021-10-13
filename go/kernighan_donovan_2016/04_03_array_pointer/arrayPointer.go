@@ -14,7 +14,7 @@ func reverse(pArr *[11]int) [11]int {
 }
 
 func main() {
-    arr := [...]int{0,1,2,3,4,5,6,7,8,9,10}
+    arr := [...]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
     fmt.Printf("\nbefore reverse: %v\n", arr)
     fmt.Printf("after reverse: %v\n\n", reverse(&arr))
 }

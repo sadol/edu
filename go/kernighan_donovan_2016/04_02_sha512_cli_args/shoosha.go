@@ -16,7 +16,7 @@ func main() {
                    "Choose type of the SHA hash sum function: 256,384 or 512.")
     flag.Parse()
 
-    if flag.NArg() > 0 {     // number of non option args sent via cli directly
+    if flag.NArg() > 0 {   // number of non optional args sent via cli directly
         noArgs = flag.NArg()
         strToHash = flag.Args()                   // non option args themselves
     } else {
